@@ -70,7 +70,7 @@ X = stats.zscore(X_fwi);
 N,M = X.shape
 
 #----------cross validation----------
-K = 10         
+K = 10        
 CV = model_selection.KFold(K, shuffle=True,random_state=42)
 
 # ----------linear regression----------
@@ -108,6 +108,7 @@ errors = []
 
 # ----------baseline----------
 baseline = []
+baseline_errors_test = np.empty(K)
 #%%
 # Outer crossvalidation loop
 for (k, (train_index, test_index)) in enumerate(CV.split(X,y)):
@@ -132,12 +133,15 @@ for (k, (train_index, test_index)) in enumerate(CV.split(X,y)):
     lambda_l.append(opt_lambda)
     lambdaI = opt_lambda * np.eye(M_lr)
     lambdaI[0,0] = 0
-    
     w_rlr[:,k] = np.linalg.solve(XtX+lambdaI,Xty).squeeze()
     
     Error_train_rlr[k] = np.sum(np.square(y_train_lr - (X_train_lr @ w_rlr[:, k]).reshape((len(y_train_lr), 1))), axis=0) / np.shape(y_train_lr)[0]
     Error_test_rlr[k] = np.sum(np.square(y_test_lr - (X_test_lr @ w_rlr[:, k]).reshape((len(y_test_lr), 1))), axis=0) / np.shape(y_test_lr)[0]
     
+    # baseline
+    y_train_mean = np.mean(y[train_index])
+    baseline_test_predict = np.full((len(test_index),1),y_train_mean)
+    baseline_errors_test[k] = np.mean(np.square(y[test_index] - baseline_test_predict))
     # ANN
     # outer cross validation
     print('\nOuter crossvalidation fold: {0}/{1}'.format(k+1,K))
@@ -209,9 +213,8 @@ for (k, (train_index, test_index)) in enumerate(CV.split(X,y)):
     se_outer = (y_test_est_outer.float()-y_test_outer.float())**2 # squared error
     mse_outer = (sum(se_outer).type(torch.float)/len(y_test_outer)).data.numpy() #mean
     errors.append(mse_outer)
-    
     # baseline
-    baseline.append(np.sum(y[train_index])/len(y[train_index]))
+    baseline.append(np.mean(baseline_errors_test))
     
     k = k +1
 

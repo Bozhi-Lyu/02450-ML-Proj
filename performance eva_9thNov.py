@@ -70,7 +70,7 @@ N,M = X.shape
 
 #%%
 # cross validation
-K = 2
+K = 10
 CV = model_selection.KFold(K, shuffle=True,random_state=42)
 
 # linear regression
@@ -91,7 +91,7 @@ n_replicates = 1       # number of networks trained in each k-fold
 max_iter = 10000 
 opt_hidden_units = []
 final_loss_l = []
-n_hidden_units_l = [1,2]
+n_hidden_units_l = [1,2,3,4,5,6,7,8,9,10]
 errors = []
 # baseline
 baseline = []

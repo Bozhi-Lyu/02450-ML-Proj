@@ -126,7 +126,7 @@ for n, n_hidden_units in enumerate(n_hidden_units_l):
     lambda_l = []
     summaries, summaries_axes = plt.subplots(1,2, figsize=(10,5))
     color_list = ['tab:orange', 'tab:green', 'tab:purple', 'tab:brown', 'tab:pink','tab:gray', 'tab:olive', 'tab:cyan', 'tab:red', 'tab:blue']
-    best_lr = None
+    
     
     for (k, (train_index, test_index)) in enumerate(CV.split(X,y)):
         # linear regression
@@ -169,6 +169,7 @@ for n, n_hidden_units in enumerate(n_hidden_units_l):
         y_test_outer = torch.Tensor(y[test_index])
           
         error_i = None
+        best_lr = None
         
         # Inner loop for hyperparameter tuning
         for (j, (train_index_inner, test_index_inner)) in enumerate(CV.split(X_train_outer,y_train_outer)):

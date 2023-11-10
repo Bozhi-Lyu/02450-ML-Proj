@@ -145,7 +145,7 @@ y_fwi, X_fwi = fwi_selection(X)
 
 
 
-N_HIDDEN_NEURONS_param = [1,2,3,5,10,16,64]
+N_HIDDEN_NEURONS_param = [1,2,4,8,64,128,256]
 n_replicates = 1       # number of networks trained in each k-fold
 max_iter = 10000 
 results_dir = "./results/"

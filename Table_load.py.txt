@@ -1,0 +1,34 @@
+from prettytable import PrettyTable
+import pandas as pd
+
+# Initialize variables to store data
+table_list = []
+
+
+# Read the file and split into individual tables
+with open('performance_table.txt', 'r') as f:
+    lines = f.readlines()
+    table_lines = []
+    for line in lines:
+        if line.strip() == '=' * 40:
+            if table_lines:
+                table_str = '\n'.join(table_lines)
+                table_list.append(table_str)
+            table_lines = []
+        else:
+            table_lines.append(line)
+
+# Convert each table into a dataframe
+dataframes = []
+for table_str in table_list:
+    table = PrettyTable()
+    table._parse_table(table_str)
+    headers = table.field_names
+    data = [row for row in table._rows]
+    df = pd.DataFrame(data, columns=headers)
+    dataframes.append(df)
+
+# Now, dataframes contains individual dataframes for each table
+# You can access them like dataframes[0], dataframes[1], etc.
+# Or concatenate them into one big dataframe if needed
+big_dataframe = pd.concat(dataframes, ignore_index=True)

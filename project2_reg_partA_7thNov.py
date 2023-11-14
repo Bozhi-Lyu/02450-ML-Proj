@@ -75,27 +75,8 @@ X_fwi = X[:,:9]
 # update N,M 
 N,M = X_fwi.shape
 
-# Fit ordinary least squares regression model
-linear = LinearRegression()
-linear.fit(X_fwi,y_fwi)
+residual = []
 
-# Predict fwi values
-y_est_fwi = linear.predict(X_fwi)
-residual = y_est_fwi-y_fwi
-
-# Display scatter plot
-figure()
-subplot(2,1,1)
-plot(y_fwi, y_est_fwi, '.')
-xlabel('FWI (true)'); ylabel('FWI (estimated)');
-subplot(2,1,2)
-hist(residual,40)
-
-show()
-
-# Calculate MSE
-mse = mean_squared_error(y_fwi,y_est_fwi)
-print(f"Mean Squared Error (MSE): {mse:.2f}")
 # mse = 1.47 we consider this result is good
 # The scatter plot seems to show a positive linear relationship between the true and predicted values, 
 # which indicates that our model has captured some underlying patterns in the data.
@@ -169,9 +150,11 @@ for train_index, test_index in CV.split(X_fwi,y_fwi):
     #model = linear.fit(X_train, y_train)
     #Error_train_rlr[k] = np.square(y_train-model.predict(X_train)).sum()/y_train.shape[0]
     #Error_test_rlr[k] = np.square(y_test-model.predict(X_test)).sum()/y_test.shape[0]
-
     
-    
+    model = LinearRegression()
+    model.fit(X_train,y_train)
+    y_est = model.predict(X_train)
+    residual.append((y_est - y_train).tolist())
 
     k+=1
 
@@ -199,7 +182,7 @@ grid()
     # You can choose to display the legend, but it's omitted for a cleaner 
     # plot, since there are many attributes
     #legend(attributeNames[:], loc='best')
-opt_l = lambda_l[np.argmin(Error_test_rlr)]
+opt_l = lambda_l[np.argmin(test_err_vs_lambda)]
 subplot(1,2,2)
 title('Optimal lambda: 1e{0}'.format(np.log10(opt_l)))
 loglog(lambdas,train_err_vs_lambda.T,'b.-',lambdas,test_err_vs_lambda.T,'r.-')
@@ -207,3 +190,15 @@ xlabel('Regularization factor')
 ylabel('Squared error (crossvalidation)')
 legend(['Train error','Validation error'])
 grid()
+
+
+
+# Display scatter plot
+figure()
+subplot(2,1,1)
+plot(y_est, y_train, '.')
+xlabel('FWI (true)'); ylabel('FWI (estimated)');
+subplot(2,1,2)
+hist(residual,100)
+
+show()

@@ -56,4 +56,7 @@ lowest_ann_E_df = select_lowest_ann_E_rows(converted_dfs)
 lowest_ann_E_df.reset_index(drop=True, inplace=True)  # Resetting index for clarity
 
 # The final DataFrame 'lowest_ann_E_df' is the result
-
+numeric_columns = ['ann_E', 'lambda*', 'lr_E', 'baseline', 'PCC', 'p-value']
+lowest_ann_E_df[numeric_columns] = lowest_ann_E_df[numeric_columns].astype(float)
+pd.options.display.float_format = '{:.3f}'.format
+print(lowest_ann_E_df)

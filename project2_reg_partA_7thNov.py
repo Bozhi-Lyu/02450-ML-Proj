@@ -17,12 +17,11 @@ from sklearn.metrics import mean_squared_error
 from sklearn import model_selection
 from toolbox_02450 import rlr_validate,train_neural_net, draw_neural_net,visualize_decision_boundary
 from scipy import stats
-import matplotlib.pyplot as plt
-
+import torch
 
 #%%
 # load data
-path = 'forest_fire.csv'
+path = '/Users/billhikari/Documents/02450 ML/02450ML_report1/forest_fire.csv'
 
 df = pd.read_csv(path, header = 1)
 
@@ -76,6 +75,33 @@ X_fwi = X[:,:9]
 # update N,M 
 N,M = X_fwi.shape
 
+# Fit ordinary least squares regression model
+linear = LinearRegression()
+linear.fit(X_fwi,y_fwi)
+
+# Predict fwi values
+y_est_fwi = linear.predict(X_fwi)
+residual = y_est_fwi-y_fwi
+
+# Display scatter plot
+figure()
+subplot(2,1,1)
+plot(y_fwi, y_est_fwi, '.')
+xlabel('FWI (true)'); ylabel('FWI (estimated)');
+subplot(2,1,2)
+hist(residual,40)
+
+show()
+
+# Calculate MSE
+mse = mean_squared_error(y_fwi,y_est_fwi)
+print(f"Mean Squared Error (MSE): {mse:.2f}")
+# mse = 1.47 we consider this result is good
+# The scatter plot seems to show a positive linear relationship between the true and predicted values, 
+# which indicates that our model has captured some underlying patterns in the data.
+# Most of the points cluster around a diagonal line, suggesting a decent model fit for many observations.
+# The residuals are mostly centered around 0, indicating that, on average, the model neither consistently overpredicts nor underpredicts the FWI.
+# The distribution of residuals appears to be approximately normal, which is a good sign for our linear regression model.
 #%%
 # project 2: Regression part a
 # a.2
@@ -143,26 +169,8 @@ for train_index, test_index in CV.split(X_fwi,y_fwi):
     #model = linear.fit(X_train, y_train)
     #Error_train_rlr[k] = np.square(y_train-model.predict(X_train)).sum()/y_train.shape[0]
     #Error_test_rlr[k] = np.square(y_test-model.predict(X_test)).sum()/y_test.shape[0]
+
     
-    # Display the results for the last cross-validation fold
-    if k == K-1:
-        figure(k, figsize=(12,8))
-        subplot(1,2,1)
-        semilogx(lambdas,mean_w_vs_lambda.T[:,1:],'.-') # Don't plot the bias term
-        xlabel('Regularization factor')
-        ylabel('Mean Coefficient Values')
-        grid()
-        # You can choose to display the legend, but it's omitted for a cleaner 
-        # plot, since there are many attributes
-        #legend(attributeNames[:], loc='best')
-        
-        subplot(1,2,2)
-        title('Optimal lambda: 1e{0}'.format(np.log10(opt_lambda)))
-        loglog(lambdas,train_err_vs_lambda.T,'b.-',lambdas,test_err_vs_lambda.T,'r.-')
-        xlabel('Regularization factor')
-        ylabel('Squared error (crossvalidation)')
-        legend(['Train error','Validation error'])
-        grid()
     
 
     k+=1
@@ -181,11 +189,21 @@ for m in range(M-1):
 # Beyond this point, as the regularization factor increases further, 
 # the validation error starts to rise significantly.
 
-plt.figure(figsize=(12,8))
-plt.plot(range(1, K+1), Error_train_rlr, '-')
-plt.plot(range(1, K+1), Error_test_rlr, '-')
-plt.xlabel('K Fold')
-plt.ylabel('Generalization Error')
-plt.legend(['Regularized train error', 'Regularized test error'])
-plt.grid()
-plt.show()
+
+figure(k, figsize=(12,8))
+subplot(1,2,1)
+semilogx(lambdas,mean_w_vs_lambda.T[:,1:],'.-') # Don't plot the bias term
+xlabel('Regularization factor')
+ylabel('Mean Coefficient Values')
+grid()
+    # You can choose to display the legend, but it's omitted for a cleaner 
+    # plot, since there are many attributes
+    #legend(attributeNames[:], loc='best')
+opt_l = lambda_l[np.argmin(Error_test_rlr)]
+subplot(1,2,2)
+title('Optimal lambda: 1e{0}'.format(np.log10(opt_l)))
+loglog(lambdas,train_err_vs_lambda.T,'b.-',lambdas,test_err_vs_lambda.T,'r.-')
+xlabel('Regularization factor')
+ylabel('Squared error (crossvalidation)')
+legend(['Train error','Validation error'])
+grid()
